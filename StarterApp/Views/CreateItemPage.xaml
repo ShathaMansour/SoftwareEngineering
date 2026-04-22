@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StarterApp.Views.CreateItemPage"
+             Title="Create Item">
+
+    <VerticalStackLayout Padding="20" Spacing="10">
+
+        <Entry Placeholder="Title"
+               Text="{Binding Title}" />
+
+        <Entry Placeholder="Description"
+               Text="{Binding Description}" />
+
+        <Picker Title="Select Category"
+                ItemsSource="{Binding Categories}"
+                ItemDisplayBinding="{Binding Name}"
+                SelectedItem="{Binding SelectedCategory}" />
+
+        <Entry Placeholder="Daily Rate (£)"
+               Text="{Binding DailyRate}"
+               Keyboard="Numeric" />
+
+        <Label Text="{Binding StatusMessage}"
+               TextColor="Green" />
+
+        <Button Text="Create Item"
+                Command="{Binding CreateItemCommand}" />
+
+    </VerticalStackLayout>
+
+</ContentPage>
