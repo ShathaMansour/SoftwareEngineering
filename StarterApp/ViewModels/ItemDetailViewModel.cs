@@ -13,6 +13,8 @@ public partial class ItemDetailViewModel : ObservableObject
     private readonly IApiService? _apiService;
     private readonly IItemRepository? _itemRepository;
     private readonly ICategoryRepository? _categoryRepository;
+    private readonly IRentalService _rentalService;
+
 
     [ObservableProperty] private string title = string.Empty;
     [ObservableProperty] private string description = string.Empty;
@@ -21,7 +23,8 @@ public partial class ItemDetailViewModel : ObservableObject
     [ObservableProperty] private bool isOwner;
     [ObservableProperty] private bool isEditing;
     [ObservableProperty] private string statusMessage = string.Empty;
-
+    [ObservableProperty] private DateTime startDate = DateTime.Today;
+    [ObservableProperty] private DateTime endDate = DateTime.Today.AddDays(1);
     private List<Category> _categories = new();
     public List<Category> Categories
     {
@@ -56,28 +59,32 @@ public Item? Item
 
     public IAsyncRelayCommand SaveChangesCommand { get; }
     public IRelayCommand ToggleEditCommand { get; }
+     public IAsyncRelayCommand RentItemCommand { get; }
 
     // API mode constructor
-    public ItemDetailViewModel(IAuthenticationService authService, IApiService apiService)
+    public ItemDetailViewModel(IAuthenticationService authService, IApiService apiService, IRentalService rentalService)
     {
         _authService = authService;
         _apiService = apiService;
+        _rentalService = rentalService;
         SaveChangesCommand = new AsyncRelayCommand(SaveChangesAsync);
         ToggleEditCommand = new RelayCommand(ToggleEdit);
+        RentItemCommand = new AsyncRelayCommand(RentItemAsync);
         _ = LoadCategoriesAsync();
     }
 
     // Local DB mode constructor
-    public ItemDetailViewModel(IAuthenticationService authService, IItemRepository itemRepository, ICategoryRepository categoryRepository)
+    public ItemDetailViewModel(IAuthenticationService authService, IItemRepository itemRepository, ICategoryRepository categoryRepository, IRentalService rentalService)
     {
         _authService = authService;
         _itemRepository = itemRepository;
         _categoryRepository = categoryRepository;
+        _rentalService = rentalService;
         SaveChangesCommand = new AsyncRelayCommand(SaveChangesAsync);
         ToggleEditCommand = new RelayCommand(ToggleEdit);
+        RentItemCommand = new AsyncRelayCommand(RentItemAsync);
         _ = LoadCategoriesAsync();
     }
-
     private async Task LoadCategoriesAsync()
 {
     if (_apiService != null)
@@ -151,4 +158,24 @@ public Item? Item
         StatusMessage = $"Update failed: {ex.Message}";
     }
 }
+    private async Task RentItemAsync()
+    {
+        if (_item == null) return;
+
+        if (EndDate <= StartDate)
+        {
+            StatusMessage = "End date must be after start date.";
+            return;
+        }
+
+        try
+        {
+            await _rentalService.CreateRentalAsync(_item.Id, StartDate, EndDate);
+            StatusMessage = "Rental requested successfully!";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to request rental: {ex.Message}";
+        }
+    }
 }

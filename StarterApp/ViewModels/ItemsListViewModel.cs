@@ -15,6 +15,8 @@ public class ItemsListViewModel : ObservableObject
     private ObservableCollection<Item> _items = new();
 
     public ObservableCollection<Item> Items
+
+    
     {
         get => _items;
         set => SetProperty(ref _items, value);
@@ -31,6 +33,7 @@ public class ItemsListViewModel : ObservableObject
         GoToCreateItemCommand = new AsyncRelayCommand(GoToCreateItemAsync);
         ViewItemCommand = new AsyncRelayCommand<Item>(ViewItemAsync);
         _ = LoadItemsCommand.ExecuteAsync(null);
+        GoToRentalsCommand = new AsyncRelayCommand(GoToRentalsAsync);
     }
 
     public ItemsListViewModel(IItemRepository itemRepository)
@@ -40,6 +43,7 @@ public class ItemsListViewModel : ObservableObject
         GoToCreateItemCommand = new AsyncRelayCommand(GoToCreateItemAsync);
         ViewItemCommand = new AsyncRelayCommand<Item>(ViewItemAsync);
         _ = LoadItemsCommand.ExecuteAsync(null);
+        GoToRentalsCommand = new AsyncRelayCommand(GoToRentalsAsync);
     }
 
     private async Task LoadItemsAsync()
@@ -80,4 +84,19 @@ public class ItemsListViewModel : ObservableObject
     {
         await Shell.Current.GoToAsync(nameof(CreateItemPage));
     }
+    public IAsyncRelayCommand GoToRentalsCommand { get; }
+
+
+
+
+private async Task GoToRentalsAsync()
+{
+    try
+    {
+        await Shell.Current.GoToAsync(nameof(RentalsPage));
+    }
+    catch (Exception ex)
+    {
+        await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
+    }}
 }

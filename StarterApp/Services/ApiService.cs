@@ -73,4 +73,49 @@ public class ApiService : IApiService
     // --- DTOs ---
     private record ItemsResponse(List<Item> Items, int TotalItems, int Page, int PageSize, int TotalPages);
     private record NearbyItemsResponse(List<Item> Items, int TotalResults);
+    public async Task<Rental> CreateRentalAsync(int itemId, DateTime startDate, DateTime endDate)
+{
+    var response = await _httpClient.PostAsJsonAsync("rentals", new
+    {
+        itemId = itemId,
+        startDate = startDate.ToString("yyyy-MM-dd"),
+        endDate = endDate.ToString("yyyy-MM-dd")
+    });
+
+    if (!response.IsSuccessStatusCode)
+    {
+        var raw = await response.Content.ReadAsStringAsync();
+        throw new Exception(raw);
+    }
+
+    return (await response.Content.ReadFromJsonAsync<Rental>(_jsonOptions))!;
+}
+
+public async Task<List<Rental>> GetIncomingRentalsAsync()
+{
+    var response = await _httpClient.GetFromJsonAsync<RentalsResponse>("rentals/incoming", _jsonOptions);
+    return response?.Rentals ?? new List<Rental>();
+}
+
+public async Task<List<Rental>> GetOutgoingRentalsAsync()
+{
+    var response = await _httpClient.GetFromJsonAsync<RentalsResponse>("rentals/outgoing", _jsonOptions);
+    return response?.Rentals ?? new List<Rental>();
+}
+
+public async Task UpdateRentalStatusAsync(int rentalId, string status)
+{
+    var response = await _httpClient.PatchAsJsonAsync($"rentals/{rentalId}/status", new
+    {
+        status = status
+    });
+
+    if (!response.IsSuccessStatusCode)
+    {
+        var raw = await response.Content.ReadAsStringAsync();
+        throw new Exception(raw);
+    }
+}
+
+private record RentalsResponse(List<Rental> Rentals, int TotalRentals);
 }
