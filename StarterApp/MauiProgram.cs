@@ -30,6 +30,7 @@ public static class MauiProgram
             builder.Services.AddSingleton(httpClient);
             builder.Services.AddSingleton<IAuthenticationService, ApiAuthenticationService>();
             builder.Services.AddSingleton<IApiService, ApiService>();
+            builder.Services.AddTransient<IRentalService, RentalService>();
         }
         else
         {
@@ -37,6 +38,8 @@ public static class MauiProgram
             builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
             builder.Services.AddTransient<IItemRepository, ItemRepository>();
             builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddTransient<IRentalRepository, RentalRepository>();
+            builder.Services.AddTransient<IRentalService, RentalService>();
         }
 
         // --- Services (both modes) ---
@@ -66,6 +69,8 @@ public static class MauiProgram
         builder.Services.AddTransient<CreateItemPage>();
         builder.Services.AddTransient<ItemDetailViewModel>();
         builder.Services.AddTransient<ItemDetailPage>();
+        builder.Services.AddTransient<RentalsViewModel>();
+        builder.Services.AddTransient<RentalsPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();
