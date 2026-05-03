@@ -61,4 +61,13 @@ public class ReviewService : IReviewService
         };
         return await _reviewRepository!.CreateAsync(review);
     }
+    public async Task<(List<Review> Reviews, double AverageRating, int TotalReviews)> GetUserReviewsWithRatingAsync(int userId)
+    {
+        if (_apiService != null)
+            return await _apiService.GetUserReviewsWithRatingAsync(userId);
+
+        var reviews = await _reviewRepository!.GetByUserIdAsync(userId);
+        var avg = reviews.Count > 0 ? reviews.Average(r => r.Rating) : 0;
+        return (reviews, avg, reviews.Count);
+    }
 }
