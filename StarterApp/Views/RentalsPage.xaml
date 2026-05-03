@@ -30,7 +30,6 @@
                         <Label Text="{Binding EndDate, StringFormat='End: {0:dd/MM/yyyy}'}" />
                         <Label Text="{Binding TotalPrice, StringFormat='Total: £{0:F2}'}" />
 
-                        <!-- Approve/Reject buttons for Requested rentals -->
                         <Grid ColumnDefinitions="*,*" IsVisible="{Binding IsRequested}">
                             <Button Grid.Column="0" Text="Approve"
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ApproveRentalCommand}"
@@ -58,6 +57,13 @@
                         <Label Text="{Binding StartDate, StringFormat='Start: {0:dd/MM/yyyy}'}" />
                         <Label Text="{Binding EndDate, StringFormat='End: {0:dd/MM/yyyy}'}" />
                         <Label Text="{Binding TotalPrice, StringFormat='Total: £{0:F2}'}" />
+
+                        <!-- Leave a Review button for Completed rentals -->
+                        <Button Text="Leave a Review"
+                                IsVisible="{Binding Status, Converter={StaticResource StringEqualsConverter}, ConverterParameter='Completed'}"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.LeaveReviewCommand}"
+                                CommandParameter="{Binding}" />
+
                         <BoxView HeightRequest="1" Color="LightGray" />
                     </VerticalStackLayout>
                 </DataTemplate>
