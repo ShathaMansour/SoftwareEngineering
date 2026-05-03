@@ -15,7 +15,6 @@ public partial class ItemDetailViewModel : ObservableObject
     private readonly ICategoryRepository? _categoryRepository;
     private readonly IRentalService _rentalService;
 
-
     [ObservableProperty] private string title = string.Empty;
     [ObservableProperty] private string description = string.Empty;
     [ObservableProperty] private string category = string.Empty;
@@ -25,6 +24,7 @@ public partial class ItemDetailViewModel : ObservableObject
     [ObservableProperty] private string statusMessage = string.Empty;
     [ObservableProperty] private DateTime startDate = DateTime.Today;
     [ObservableProperty] private DateTime endDate = DateTime.Today.AddDays(1);
+
     private List<Category> _categories = new();
     public List<Category> Categories
     {
@@ -38,28 +38,30 @@ public partial class ItemDetailViewModel : ObservableObject
         get => _selectedCategory;
         set => SetProperty(ref _selectedCategory, value);
     }
-private Item? _item;
-public Item? Item
-{
-    get => _item;
-    set
+
+    private Item? _item;
+    public Item? Item
     {
-        _item = value;
-        if (value != null)
+        get => _item;
+        set
         {
-            Title = value.Title;
-            Description = value.Description;
-            Category = value.Category;
-            DailyRate = value.DailyRate;
-            IsOwner = _authService.CurrentUser?.Id == value.OwnerId;
-            _ = LoadItemAsync(); // fetch fresh data from API
+            _item = value;
+            if (value != null)
+            {
+                Title = value.Title;
+                Description = value.Description;
+                Category = value.Category;
+                DailyRate = value.DailyRate;
+                IsOwner = _authService.CurrentUser?.Id == value.OwnerId;
+                _ = LoadItemAsync();
+            }
         }
     }
-}
 
     public IAsyncRelayCommand SaveChangesCommand { get; }
     public IRelayCommand ToggleEditCommand { get; }
-     public IAsyncRelayCommand RentItemCommand { get; }
+    public IAsyncRelayCommand RentItemCommand { get; }
+    public IAsyncRelayCommand ViewReviewsCommand { get; }
 
     // API mode constructor
     public ItemDetailViewModel(IAuthenticationService authService, IApiService apiService, IRentalService rentalService)
@@ -70,6 +72,7 @@ public Item? Item
         SaveChangesCommand = new AsyncRelayCommand(SaveChangesAsync);
         ToggleEditCommand = new RelayCommand(ToggleEdit);
         RentItemCommand = new AsyncRelayCommand(RentItemAsync);
+        ViewReviewsCommand = new AsyncRelayCommand(ViewReviewsAsync);
         _ = LoadCategoriesAsync();
     }
 
@@ -83,91 +86,94 @@ public Item? Item
         SaveChangesCommand = new AsyncRelayCommand(SaveChangesAsync);
         ToggleEditCommand = new RelayCommand(ToggleEdit);
         RentItemCommand = new AsyncRelayCommand(RentItemAsync);
+        ViewReviewsCommand = new AsyncRelayCommand(ViewReviewsAsync);
         _ = LoadCategoriesAsync();
     }
-    private async Task LoadCategoriesAsync()
-{
-    if (_apiService != null)
-        Categories = await _apiService.GetCategoriesAsync();
-    else
-        Categories = await _categoryRepository!.GetAllAsync();
 
-    if (_item != null)
-        SelectedCategory = Categories.FirstOrDefault(c => c.Name == _item.Category);
-}
+    private async Task ViewReviewsAsync()
+    {
+        if (_item == null) return;
+        await Shell.Current.GoToAsync("ReviewsPage", new Dictionary<string, object>
+        {
+            { "Item", _item }
+        });
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        if (_apiService != null)
+            Categories = await _apiService.GetCategoriesAsync();
+        else
+            Categories = await _categoryRepository!.GetAllAsync();
+
+        if (_item != null)
+            SelectedCategory = Categories.FirstOrDefault(c => c.Name == _item.Category);
+    }
 
     private async Task LoadItemAsync()
-{
-    if (_item == null) return;
+    {
+        if (_item == null) return;
+        try
+        {
+            Item? freshItem;
+            if (_apiService != null)
+                freshItem = await _apiService.GetItemByIdAsync(_item.Id);
+            else
+                freshItem = await _itemRepository!.GetByIdAsync(_item.Id);
 
-    try
-    {
-        Item? freshItem;
-        if (_apiService != null)
-            freshItem = await _apiService.GetItemByIdAsync(_item.Id);
-        else
-            freshItem = await _itemRepository!.GetByIdAsync(_item.Id);
+            if (freshItem != null)
+                Item = freshItem;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Failed to reload item: {ex.Message}";
+        }
+    }
 
-        if (freshItem != null)
-            Item = freshItem;
-    }
-    catch (Exception ex)
-    {
-        StatusMessage = $"Failed to reload item: {ex.Message}";
-    }
-}
-    private void ToggleEdit()
-    {
-        IsEditing = !IsEditing;
-    }
+    private void ToggleEdit() => IsEditing = !IsEditing;
 
     private async Task SaveChangesAsync()
-{
-    if (_item == null) return;
-
-    try
     {
-        if (SelectedCategory == null)
+        if (_item == null) return;
+        try
         {
-            StatusMessage = "Please select a category.";
-            return;
+            if (SelectedCategory == null)
+            {
+                StatusMessage = "Please select a category.";
+                return;
+            }
+            _item.Title = Title;
+            _item.Description = Description;
+            _item.DailyRate = DailyRate;
+            _item.Category = SelectedCategory.Name;
+            _item.CategoryId = SelectedCategory.Id;
+
+            if (_apiService != null)
+                await _apiService.UpdateItemAsync(_item);
+            else
+                await _itemRepository!.UpdateAsync(_item);
+
+            Title = _item.Title;
+            Description = _item.Description;
+            DailyRate = _item.DailyRate;
+            Category = _item.Category;
+            IsEditing = false;
+            StatusMessage = "Item updated successfully!";
         }
-
-        _item.Title = Title;
-        _item.Description = Description;
-        _item.DailyRate = DailyRate;
-        _item.Category = SelectedCategory.Name;
-        _item.CategoryId = SelectedCategory.Id;
-
-        if (_apiService != null)
-            await _apiService.UpdateItemAsync(_item);
-        else
-            await _itemRepository!.UpdateAsync(_item);
-
-        // Update the display properties so UI reflects the saved values
-        Title = _item.Title;
-        Description = _item.Description;
-        DailyRate = _item.DailyRate;
-        Category = _item.Category; // this is what the view mode label shows
-
-        IsEditing = false;
-        StatusMessage = "Item updated successfully!";
+        catch (Exception ex)
+        {
+            StatusMessage = $"Update failed: {ex.Message}";
+        }
     }
-    catch (Exception ex)
-    {
-        StatusMessage = $"Update failed: {ex.Message}";
-    }
-}
+
     private async Task RentItemAsync()
     {
         if (_item == null) return;
-
         if (EndDate <= StartDate)
         {
             StatusMessage = "End date must be after start date.";
             return;
         }
-
         try
         {
             await _rentalService.CreateRentalAsync(_item.Id, StartDate, EndDate);
