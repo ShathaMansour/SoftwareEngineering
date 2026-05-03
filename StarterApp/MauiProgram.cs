@@ -31,6 +31,9 @@ public static class MauiProgram
             builder.Services.AddSingleton<IAuthenticationService, ApiAuthenticationService>();
             builder.Services.AddSingleton<IApiService, ApiService>();
             builder.Services.AddTransient<IRentalService, RentalService>();
+            builder.Services.AddTransient<IReviewService, ReviewService>();
+            builder.Services.AddTransient<ReviewsViewModel>();
+            builder.Services.AddTransient<ReviewsPage>();
         }
         else
         {
@@ -71,6 +74,9 @@ public static class MauiProgram
         builder.Services.AddTransient<ItemDetailPage>();
         builder.Services.AddTransient<RentalsViewModel>();
         builder.Services.AddTransient<RentalsPage>();
+        builder.Services.AddTransient<IReviewService, ReviewService>();
+        builder.Services.AddTransient<ReviewsViewModel>();
+        builder.Services.AddTransient<ReviewsPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();
