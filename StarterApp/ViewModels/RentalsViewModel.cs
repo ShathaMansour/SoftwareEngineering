@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using StarterApp.Database.Models;
 using StarterApp.Services;
+using StarterApp.Views;
 
 namespace StarterApp.ViewModels;
 
@@ -50,6 +51,7 @@ public class RentalsViewModel : ObservableObject
     public IAsyncRelayCommand<Rental> RejectRentalCommand { get; }
     public IRelayCommand ShowIncomingCommand { get; }
     public IRelayCommand ShowOutgoingCommand { get; }
+    public IAsyncRelayCommand<Rental> LeaveReviewCommand { get; }
 
     public RentalsViewModel(IRentalService rentalService)
     {
@@ -59,6 +61,7 @@ public class RentalsViewModel : ObservableObject
         RejectRentalCommand = new AsyncRelayCommand<Rental>(RejectRentalAsync);
         ShowIncomingCommand = new RelayCommand(() => IsIncomingSelected = true);
         ShowOutgoingCommand = new RelayCommand(() => IsIncomingSelected = false);
+        LeaveReviewCommand = new AsyncRelayCommand<Rental>(LeaveReviewAsync);
         _ = LoadRentalsAsync();
     }
 
@@ -106,4 +109,12 @@ public class RentalsViewModel : ObservableObject
             StatusMessage = $"Failed: {ex.Message}";
         }
     }
+    private async Task LeaveReviewAsync(Rental? rental)
+{
+    if (rental == null) return;
+    await Shell.Current.GoToAsync(nameof(ReviewsPage), new Dictionary<string, object>
+    {
+        { "Rental", rental }
+    });
+}
 }
