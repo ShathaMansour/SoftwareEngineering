@@ -34,6 +34,9 @@ public static class MauiProgram
             builder.Services.AddTransient<IReviewService, ReviewService>();
             builder.Services.AddTransient<ReviewsViewModel>();
             builder.Services.AddTransient<ReviewsPage>();
+            builder.Services.AddSingleton<ILocationService, LocationService>();
+            builder.Services.AddTransient<NearbyItemsViewModel>();
+            builder.Services.AddTransient<NearbyItemsPage>();
         }
         else
         {
@@ -43,6 +46,7 @@ public static class MauiProgram
             builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
             builder.Services.AddTransient<IRentalRepository, RentalRepository>();
             builder.Services.AddTransient<IRentalService, RentalService>();
+            builder.Services.AddSingleton<ILocationService, LocationService>();
         }
 
         // --- Services (both modes) ---
@@ -77,6 +81,8 @@ public static class MauiProgram
         builder.Services.AddTransient<IReviewService, ReviewService>();
         builder.Services.AddTransient<ReviewsViewModel>();
         builder.Services.AddTransient<ReviewsPage>();
+        builder.Services.AddTransient<ProfileViewModel>();
+        builder.Services.AddTransient<ProfilePage>();
 
 #if DEBUG
         builder.Logging.AddDebug();
