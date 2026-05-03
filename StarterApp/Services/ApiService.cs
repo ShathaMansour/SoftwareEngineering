@@ -46,7 +46,13 @@ public class ApiService : IApiService
             latitude = item.Latitude,
             longitude = item.Longitude
         });
-        response.EnsureSuccessStatusCode();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var raw = await response.Content.ReadAsStringAsync();
+            throw new Exception(raw);
+        }
+
         return (await response.Content.ReadFromJsonAsync<Item>(_jsonOptions))!;
     }
 
@@ -153,4 +159,10 @@ public async Task<Review> SubmitReviewAsync(int rentalId, int rating, string? co
 }
 
 private record ReviewsResponse(List<Review> Reviews, double AverageRating, int TotalReviews);
+public async Task<(List<Review> Reviews, double AverageRating, int TotalReviews)> GetUserReviewsWithRatingAsync(int userId)
+{
+    var response = await _httpClient.GetFromJsonAsync<ReviewsResponse>(
+        $"users/{userId}/reviews", _jsonOptions);
+    return (response?.Reviews ?? new List<Review>(), response?.AverageRating ?? 0, response?.TotalReviews ?? 0);
+}
 }

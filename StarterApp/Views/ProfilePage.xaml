@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StarterApp.Views.ProfilePage"
+             Title="Profile">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- User Info -->
+            <Label Text="{Binding CurrentUser.FullName}" FontSize="24" FontAttributes="Bold" />
+            <Label Text="{Binding CurrentUser.Email}" TextColor="Gray" />
+
+            <!-- Rating -->
+            <BoxView HeightRequest="1" Color="LightGray" />
+            <Label Text="My Rating" FontAttributes="Bold" FontSize="16" />
+            <Label Text="{Binding AverageRating, StringFormat='Average Rating: {0:F1} / 5'}" />
+            <Label Text="{Binding TotalReviews, StringFormat='{0} reviews received'}" TextColor="Gray" />
+
+            <BoxView HeightRequest="1" Color="LightGray" />
+
+            <!-- Change Password -->
+            <Button Text="Change Password"
+                    Command="{Binding TogglePasswordChangeModeCommand}"
+                    IsVisible="{Binding IsChangingPassword, Converter={StaticResource InvertedBoolConverter}}" />
+
+            <VerticalStackLayout IsVisible="{Binding IsChangingPassword}" Spacing="10">
+                <Label Text="Change Password" FontAttributes="Bold" FontSize="16" />
+                <Entry Placeholder="Current Password" IsPassword="True" Text="{Binding CurrentPassword}" />
+                <Entry Placeholder="New Password" IsPassword="True" Text="{Binding NewPassword}" />
+                <Entry Placeholder="Confirm New Password" IsPassword="True" Text="{Binding ConfirmNewPassword}" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Grid.Column="0" Text="Save" Command="{Binding ChangePasswordCommand}" />
+                    <Button Grid.Column="1" Text="Cancel" Command="{Binding TogglePasswordChangeModeCommand}" />
+                </Grid>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

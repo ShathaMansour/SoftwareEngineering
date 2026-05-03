@@ -46,17 +46,23 @@ public partial class ProfileViewModel : BaseViewModel
     [ObservableProperty]
     private bool isChangingPassword;
 
+    private readonly IReviewService _reviewService;
+    [ObservableProperty] private double averageRating;
+    [ObservableProperty] private int totalReviews;
+
     /// @brief Initializes a new instance of the ProfileViewModel class
     /// @param authService The authentication service instance
     /// @param navigationService The navigation service instance
     /// @details Sets up the required services, initializes the title, and loads user data
-    public ProfileViewModel(IAuthenticationService authService, INavigationService navigationService)
+    public ProfileViewModel(IAuthenticationService authService, INavigationService navigationService, IReviewService reviewService)
     {
         _authService = authService;
         _navigationService = navigationService;
+        _reviewService = reviewService; //added for user profile ratings
         Title = "Profile";
 
         LoadUserData();
+        _ = LoadRatingAsync(); // Load user rating data
     }
 
     /// @brief Loads the current user's profile data
@@ -173,5 +179,17 @@ public partial class ProfileViewModel : BaseViewModel
         CurrentPassword = string.Empty;
         NewPassword = string.Empty;
         ConfirmNewPassword = string.Empty;
+    }
+
+    private async Task LoadRatingAsync()
+    {
+        if (_authService.CurrentUser == null) return;
+        try
+        {
+            var (reviews, avg, total) = await _reviewService.GetUserReviewsWithRatingAsync(_authService.CurrentUser.Id);
+            AverageRating = avg;
+            TotalReviews = total;
+        }
+        catch { }
     }
 }
