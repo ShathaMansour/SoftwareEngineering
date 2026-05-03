@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StarterApp.Views.ReviewsPage"
+             Title="Reviews">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- Average rating summary -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{Binding AverageRating, StringFormat='Average Rating: {0:F1} / 5'}"
+                       FontAttributes="Bold" FontSize="18" />
+                <Label Text="{Binding TotalReviews, StringFormat='{0} reviews'}"
+                       TextColor="Gray" />
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="1" Color="LightGray" />
+
+            <!-- Submit review (only if completed rental was passed) -->
+            <VerticalStackLayout IsVisible="{Binding CanReview}" Spacing="8">
+                <Label Text="Leave a Review" FontAttributes="Bold" FontSize="16" />
+                <Label Text="Rating (1-5)" />
+                <Stepper Value="{Binding SelectedRating}" Minimum="1" Maximum="5" Increment="1" />
+                <Label Text="{Binding SelectedRating, StringFormat='Rating: {0} / 5'}" />
+                <Label Text="Comment (optional)" />
+                <Editor Text="{Binding ReviewComment}"
+                        HeightRequest="80"
+                        Placeholder="Write a comment..." />
+                <Button Text="Submit Review" Command="{Binding SubmitReviewCommand}" />
+                <Label Text="{Binding StatusMessage}" TextColor="Red" />
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="1" Color="LightGray" IsVisible="{Binding CanReview}" />
+
+            <!-- Reviews list -->
+            <CollectionView ItemsSource="{Binding Reviews}">
+                <CollectionView.EmptyView>
+                    <Label Text="No reviews yet." TextColor="Gray" HorizontalOptions="Center" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout Padding="10" Spacing="4">
+                            <Label Text="{Binding ReviewerName}" FontAttributes="Bold" />
+                            <Label Text="{Binding Rating, StringFormat='Rating: {0} / 5'}" />
+                            <Label Text="{Binding Comment}" />
+                            <Label Text="{Binding CreatedAt, StringFormat='{0:dd/MM/yyyy}'}"
+                                   TextColor="Gray" FontSize="12" />
+                            <BoxView HeightRequest="1" Color="LightGray" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
