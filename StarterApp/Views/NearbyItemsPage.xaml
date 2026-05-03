@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StarterApp.Views.NearbyItemsPage"
+             Title="Find Near Me">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <VerticalStackLayout Grid.Row="0" Padding="20" Spacing="8">
+            <Label Text="Search Radius (km)" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Slider Grid.Column="0"
+                        Value="{Binding Radius}"
+                        Minimum="1" Maximum="50" />
+                <Label Grid.Column="1"
+                       Text="{Binding Radius, StringFormat='{0:F0} km'}"
+                       WidthRequest="50" />
+            </Grid>
+            <Button Text="Find Near Me" Command="{Binding FindNearMeCommand}" />
+            <Label Text="{Binding StatusMessage}" TextColor="Gray" />
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Items}">
+            <CollectionView.EmptyView>
+                <Label Text="Tap 'Find Near Me' to search."
+                       TextColor="Gray"
+                       HorizontalOptions="Center"
+                       Margin="0,20" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout Padding="20,10">
+                        <VerticalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type CollectionView}}, Path=BindingContext.ViewItemCommand}"
+                                CommandParameter="{Binding .}" />
+                        </VerticalStackLayout.GestureRecognizers>
+                        <Label Text="{Binding Title}" FontSize="18" FontAttributes="Bold" />
+                        <Label Text="{Binding Description}" TextColor="Gray" />
+                        <Label Text="{Binding DailyRate, StringFormat='£{0:F2} / day'}" />
+                        <BoxView HeightRequest="1" Color="LightGray" />
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</ContentPage>
