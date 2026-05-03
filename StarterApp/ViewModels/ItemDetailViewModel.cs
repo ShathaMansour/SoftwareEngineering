@@ -62,6 +62,7 @@ public partial class ItemDetailViewModel : ObservableObject
     public IRelayCommand ToggleEditCommand { get; }
     public IAsyncRelayCommand RentItemCommand { get; }
     public IAsyncRelayCommand ViewReviewsCommand { get; }
+    public decimal EstimatedTotal => DailyRate * (decimal)(EndDate - StartDate).TotalDays;
 
     // API mode constructor
     public ItemDetailViewModel(IAuthenticationService authService, IApiService apiService, IRentalService rentalService)
@@ -183,5 +184,14 @@ public partial class ItemDetailViewModel : ObservableObject
         {
             StatusMessage = $"Failed to request rental: {ex.Message}";
         }
+    }
+    partial void OnStartDateChanged(DateTime value)
+    {
+        OnPropertyChanged(nameof(EstimatedTotal));
+    }
+
+    partial void OnEndDateChanged(DateTime value)
+    {
+        OnPropertyChanged(nameof(EstimatedTotal));
     }
 }

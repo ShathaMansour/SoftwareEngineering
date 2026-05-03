@@ -25,6 +25,8 @@ public class ItemsListViewModel : ObservableObject
     public IAsyncRelayCommand LoadItemsCommand { get; }
     public IAsyncRelayCommand GoToCreateItemCommand { get; }
     public IAsyncRelayCommand<Item> ViewItemCommand { get; }
+    public IAsyncRelayCommand GoToNearbyCommand { get; }
+    public IAsyncRelayCommand GoToProfileCommand { get; }
 
     public ItemsListViewModel(IApiService apiService)
     {
@@ -34,6 +36,8 @@ public class ItemsListViewModel : ObservableObject
         ViewItemCommand = new AsyncRelayCommand<Item>(ViewItemAsync);
         _ = LoadItemsCommand.ExecuteAsync(null);
         GoToRentalsCommand = new AsyncRelayCommand(GoToRentalsAsync);
+        GoToNearbyCommand = new AsyncRelayCommand(GoToNearbyAsync);
+        GoToProfileCommand = new AsyncRelayCommand(GoToProfileAsync);
     }
 
     public ItemsListViewModel(IItemRepository itemRepository)
@@ -44,6 +48,8 @@ public class ItemsListViewModel : ObservableObject
         ViewItemCommand = new AsyncRelayCommand<Item>(ViewItemAsync);
         _ = LoadItemsCommand.ExecuteAsync(null);
         GoToRentalsCommand = new AsyncRelayCommand(GoToRentalsAsync);
+        GoToNearbyCommand = new AsyncRelayCommand(GoToNearbyAsync);
+        GoToProfileCommand = new AsyncRelayCommand(GoToProfileAsync);
     }
 
     private async Task LoadItemsAsync()
@@ -99,4 +105,12 @@ private async Task GoToRentalsAsync()
     {
         await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
     }}
+    private async Task GoToNearbyAsync()
+    {
+        await Shell.Current.GoToAsync(nameof(NearbyItemsPage));
+    }
+    private async Task GoToProfileAsync()
+    {
+        await Shell.Current.GoToAsync(nameof(ProfilePage));
+    }
 }

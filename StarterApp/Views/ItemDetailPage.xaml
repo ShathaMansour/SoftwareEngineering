@@ -64,6 +64,8 @@
                 <DatePicker Date="{Binding EndDate}" MinimumDate="{x:Static sys:DateTime.Today}" />
                 <Button Text="Request Rental" Command="{Binding RentItemCommand}" />
                 <Label Text="{Binding StatusMessage}" TextColor="Red" />
+                <Label Text="{Binding EstimatedTotal, StringFormat='Estimated Total: £{0:F2}'}"
+                FontAttributes="Bold" />
             </VerticalStackLayout>
 
             <BoxView HeightRequest="1" Color="LightGray" />

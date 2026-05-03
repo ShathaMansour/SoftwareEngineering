@@ -11,6 +11,7 @@ public class CreateItemViewModel : ObservableObject
     private readonly IApiService? _apiService;
     private readonly IItemRepository? _itemRepository;
     private readonly ICategoryRepository? _categoryRepository;
+    private readonly ILocationService _locationService;
 
     private string _title = string.Empty;
     public string Title
@@ -40,6 +41,27 @@ public class CreateItemViewModel : ObservableObject
         set => SetProperty(ref _statusMessage, value);
     }
 
+    private double _latitude;
+    public double Latitude
+    {
+        get => _latitude;
+        set => SetProperty(ref _latitude, value);
+    }
+
+    private double _longitude;
+    public double Longitude
+    {
+        get => _longitude;
+        set => SetProperty(ref _longitude, value);
+    }
+
+    private bool _hasLocation;
+    public bool HasLocation
+    {
+        get => _hasLocation;
+        set => SetProperty(ref _hasLocation, value);
+    }
+
     private List<Category> _categories = new();
     public List<Category> Categories
     {
@@ -55,21 +77,26 @@ public class CreateItemViewModel : ObservableObject
     }
 
     public IAsyncRelayCommand CreateItemCommand { get; }
+    public IAsyncRelayCommand UseMyLocationCommand { get; }
 
     // API mode
-    public CreateItemViewModel(IApiService apiService)
+    public CreateItemViewModel(IApiService apiService, ILocationService locationService)
     {
         _apiService = apiService;
+        _locationService = locationService;
         CreateItemCommand = new AsyncRelayCommand(CreateItemAsync);
+        UseMyLocationCommand = new AsyncRelayCommand(UseMyLocationAsync);
         _ = LoadCategoriesAsync();
     }
 
     // Local DB mode
-    public CreateItemViewModel(IItemRepository itemRepository, ICategoryRepository categoryRepository)
+    public CreateItemViewModel(IItemRepository itemRepository, ICategoryRepository categoryRepository, ILocationService locationService)
     {
         _itemRepository = itemRepository;
         _categoryRepository = categoryRepository;
+        _locationService = locationService;
         CreateItemCommand = new AsyncRelayCommand(CreateItemAsync);
+        UseMyLocationCommand = new AsyncRelayCommand(UseMyLocationAsync);
         _ = LoadCategoriesAsync();
     }
 
@@ -79,6 +106,21 @@ public class CreateItemViewModel : ObservableObject
             Categories = await _apiService.GetCategoriesAsync();
         else
             Categories = await _categoryRepository!.GetAllAsync();
+    }
+
+    private async Task UseMyLocationAsync()
+    {
+        StatusMessage = "Getting location...";
+        var location = await _locationService.GetCurrentLocationAsync();
+        if (location == null)
+        {
+            StatusMessage = "Could not get location. Please allow location access.";
+            return;
+        }
+        Latitude = location.Value.Latitude;
+        Longitude = location.Value.Longitude;
+        HasLocation = true;
+        StatusMessage = "Location set!";
     }
 
     private async Task CreateItemAsync()
@@ -91,13 +133,21 @@ public class CreateItemViewModel : ObservableObject
                 return;
             }
 
+            if (!HasLocation)
+            {
+                StatusMessage = "Please set your location.";
+                return;
+            }
+
             var item = new Item
             {
                 Title = Title,
                 Description = Description,
                 DailyRate = DailyRate,
                 CategoryId = SelectedCategory.Id,
-                Category = SelectedCategory.Name
+                Category = SelectedCategory.Name,
+                Latitude = Latitude,
+                Longitude = Longitude
             };
 
             if (_apiService != null)
@@ -105,11 +155,13 @@ public class CreateItemViewModel : ObservableObject
             else
                 await _itemRepository!.CreateAsync(item);
 
-            // Clear fields
             Title = string.Empty;
             Description = string.Empty;
             DailyRate = 0;
             SelectedCategory = null;
+            HasLocation = false;
+            Latitude = 0;
+            Longitude = 0;
             StatusMessage = "Item created successfully!";
         }
         catch (Exception ex)
