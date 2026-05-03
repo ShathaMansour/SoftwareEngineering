@@ -118,4 +118,39 @@ public async Task UpdateRentalStatusAsync(int rentalId, string status)
 }
 
 private record RentalsResponse(List<Rental> Rentals, int TotalRentals);
+
+// Reviews
+public async Task<List<Review>> GetItemReviewsAsync(int itemId)
+{
+    var response = await _httpClient.GetFromJsonAsync<ReviewsResponse>(
+        $"items/{itemId}/reviews", _jsonOptions);
+    return response?.Reviews ?? new List<Review>();
+}
+
+public async Task<List<Review>> GetUserReviewsAsync(int userId)
+{
+    var response = await _httpClient.GetFromJsonAsync<ReviewsResponse>(
+        $"users/{userId}/reviews", _jsonOptions);
+    return response?.Reviews ?? new List<Review>();
+}
+
+public async Task<Review> SubmitReviewAsync(int rentalId, int rating, string? comment)
+{
+    var response = await _httpClient.PostAsJsonAsync("reviews", new
+    {
+        rentalId = rentalId,
+        rating = rating,
+        comment = comment
+    });
+
+    if (!response.IsSuccessStatusCode)
+    {
+        var raw = await response.Content.ReadAsStringAsync();
+        throw new Exception(raw);
+    }
+
+    return (await response.Content.ReadFromJsonAsync<Review>(_jsonOptions))!;
+}
+
+private record ReviewsResponse(List<Review> Reviews, double AverageRating, int TotalReviews);
 }

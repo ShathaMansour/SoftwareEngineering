@@ -16,4 +16,8 @@ Task<Rental> CreateRentalAsync(int itemId, DateTime startDate, DateTime endDate)
 Task<List<Rental>> GetIncomingRentalsAsync();
 Task<List<Rental>> GetOutgoingRentalsAsync();
 Task UpdateRentalStatusAsync(int rentalId, string status);
+// Reviews
+Task<List<Review>> GetItemReviewsAsync(int itemId);
+Task<List<Review>> GetUserReviewsAsync(int userId);
+Task<Review> SubmitReviewAsync(int rentalId, int rating, string? comment);
 }
