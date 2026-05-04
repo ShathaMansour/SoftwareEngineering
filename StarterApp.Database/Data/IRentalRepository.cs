@@ -9,4 +9,5 @@ public interface IRentalRepository
     Task<Rental?> GetByIdAsync(int id);
     Task<Rental> CreateAsync(Rental rental);
     Task UpdateStatusAsync(int rentalId, string status);
+    Task<List<Rental>> GetConflictingRentalsAsync(int itemId, DateTime startDate, DateTime endDate);
 }

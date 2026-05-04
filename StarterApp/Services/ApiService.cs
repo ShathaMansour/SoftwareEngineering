@@ -91,6 +91,8 @@ public class ApiService : IApiService
     if (!response.IsSuccessStatusCode)
     {
         var raw = await response.Content.ReadAsStringAsync();
+        if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            throw new Exception("This item is already booked for these dates.");
         throw new Exception(raw);
     }
 
@@ -165,4 +167,14 @@ public async Task<(List<Review> Reviews, double AverageRating, int TotalReviews)
         $"users/{userId}/reviews", _jsonOptions);
     return (response?.Reviews ?? new List<Review>(), response?.AverageRating ?? 0, response?.TotalReviews ?? 0);
 }
+public async Task<Rental?> GetRentalByIdAsync(int rentalId)
+{
+    var response = await _httpClient.GetAsync($"rentals/{rentalId}");
+
+    if (!response.IsSuccessStatusCode)
+        return null;
+
+    return await response.Content.ReadFromJsonAsync<Rental>();
+}
+
 }

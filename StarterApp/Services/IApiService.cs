@@ -21,4 +21,5 @@ Task<List<Review>> GetItemReviewsAsync(int itemId);
 Task<List<Review>> GetUserReviewsAsync(int userId);
 Task<Review> SubmitReviewAsync(int rentalId, int rating, string? comment);
 Task<(List<Review> Reviews, double AverageRating, int TotalReviews)> GetUserReviewsWithRatingAsync(int userId);
+Task<Rental?> GetRentalByIdAsync(int rentalId);
 }

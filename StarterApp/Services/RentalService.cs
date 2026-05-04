@@ -57,6 +57,18 @@ public class RentalService : IRentalService
         if (_apiService != null)
             return await _apiService.CreateRentalAsync(itemId, startDate, endDate);
 
+        // Date validation
+        if (startDate.Date < DateTime.UtcNow.Date)
+            throw new Exception("Start date cannot be in the past.");
+
+        if (endDate.Date <= startDate.Date)
+            throw new Exception("End date must be after start date.");
+
+        // Double-booking check
+        var existing = await _rentalRepository!.GetConflictingRentalsAsync(itemId, startDate, endDate);
+        if (existing.Any())
+            throw new Exception("This item is already booked for the selected dates.");
+
         var rental = new Rental
         {
             ItemId = itemId,
@@ -66,6 +78,7 @@ public class RentalService : IRentalService
             Status = "Requested",
             RequestedAt = DateTime.UtcNow
         };
+
         return await _rentalRepository!.CreateAsync(rental);
     }
 

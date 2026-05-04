@@ -39,6 +39,17 @@
                                     CommandParameter="{Binding}" />
                         </Grid>
 
+                        <!-- Mark as Out for Rent for Approved -->
+<Button Text="Mark as Out for Rent"
+        IsVisible="{Binding IsApproved}"
+        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.MarkOutForRentCommand}"
+        CommandParameter="{Binding}" />
+
+                                                <Button Text="Mark as Completed"
+                                                    IsVisible="{Binding IsReturned}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.MarkCompletedCommand}"
+                                                    CommandParameter="{Binding}" />
+
                         <BoxView HeightRequest="1" Color="LightGray" />
                     </VerticalStackLayout>
                 </DataTemplate>
@@ -57,13 +68,18 @@
                         <Label Text="{Binding StartDate, StringFormat='Start: {0:dd/MM/yyyy}'}" />
                         <Label Text="{Binding EndDate, StringFormat='End: {0:dd/MM/yyyy}'}" />
                         <Label Text="{Binding TotalPrice, StringFormat='Total: £{0:F2}'}" />
-
-                        <!-- Leave a Review button for Completed rentals -->
+                        <Button Text="Mark as Returned"
+                                IsVisible="{Binding IsOutForRent}"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.MarkReturnedCommand}"
+                                CommandParameter="{Binding}" />
+                        <Button Text="Mark as Returned (Overdue)"
+                                IsVisible="{Binding IsOverdue}"
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.MarkReturnedCommand}"
+                                CommandParameter="{Binding}" />
                         <Button Text="Leave a Review"
                                 IsVisible="{Binding Status, Converter={StaticResource StringEqualsConverter}, ConverterParameter='Completed'}"
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.LeaveReviewCommand}"
                                 CommandParameter="{Binding}" />
-
                         <BoxView HeightRequest="1" Color="LightGray" />
                     </VerticalStackLayout>
                 </DataTemplate>

@@ -49,9 +49,12 @@ public class RentalsViewModel : ObservableObject
     public IAsyncRelayCommand LoadRentalsCommand { get; }
     public IAsyncRelayCommand<Rental> ApproveRentalCommand { get; }
     public IAsyncRelayCommand<Rental> RejectRentalCommand { get; }
+    public IAsyncRelayCommand<Rental> MarkReturnedCommand { get; }
+    public IAsyncRelayCommand<Rental> MarkCompletedCommand { get; }
+    public IAsyncRelayCommand<Rental> LeaveReviewCommand { get; }
+    public IAsyncRelayCommand<Rental> MarkOutForRentCommand { get; }
     public IRelayCommand ShowIncomingCommand { get; }
     public IRelayCommand ShowOutgoingCommand { get; }
-    public IAsyncRelayCommand<Rental> LeaveReviewCommand { get; }
 
     public RentalsViewModel(IRentalService rentalService)
     {
@@ -59,9 +62,12 @@ public class RentalsViewModel : ObservableObject
         LoadRentalsCommand = new AsyncRelayCommand(LoadRentalsAsync);
         ApproveRentalCommand = new AsyncRelayCommand<Rental>(ApproveRentalAsync);
         RejectRentalCommand = new AsyncRelayCommand<Rental>(RejectRentalAsync);
+        MarkOutForRentCommand = new AsyncRelayCommand<Rental>(MarkOutForRentAsync);
+        MarkReturnedCommand = new AsyncRelayCommand<Rental>(MarkReturnedAsync);
+        MarkCompletedCommand = new AsyncRelayCommand<Rental>(MarkCompletedAsync);
+        LeaveReviewCommand = new AsyncRelayCommand<Rental>(LeaveReviewAsync);
         ShowIncomingCommand = new RelayCommand(() => IsIncomingSelected = true);
         ShowOutgoingCommand = new RelayCommand(() => IsIncomingSelected = false);
-        LeaveReviewCommand = new AsyncRelayCommand<Rental>(LeaveReviewAsync);
         _ = LoadRentalsAsync();
     }
 
@@ -80,6 +86,42 @@ public class RentalsViewModel : ObservableObject
         }
     }
 
+    private async Task MarkOutForRentAsync(Rental? rental)
+    {
+        if (rental == null) return;
+        try
+        {
+            await _rentalService.UpdateRentalStatusAsync(rental.Id, "Out for Rent");
+            StatusMessage = "Marked as out for rent.";
+            await LoadRentalsAsync();
+        }
+        catch (Exception ex) { StatusMessage = $"Failed: {ex.Message}"; }
+    }
+
+    private async Task MarkReturnedAsync(Rental? rental)
+    {
+        if (rental == null) return;
+        try
+        {
+            await _rentalService.UpdateRentalStatusAsync(rental.Id, "Returned");
+            StatusMessage = "Marked as returned.";
+            await LoadRentalsAsync();
+        }
+        catch (Exception ex) { StatusMessage = $"Failed: {ex.Message}"; }
+    }
+
+    private async Task MarkCompletedAsync(Rental? rental)
+    {
+        if (rental == null) return;
+        try
+        {
+            await _rentalService.UpdateRentalStatusAsync(rental.Id, "Completed");
+            StatusMessage = "Rental completed!";
+            await LoadRentalsAsync();
+        }
+        catch (Exception ex) { StatusMessage = $"Failed: {ex.Message}"; }
+    }
+
     private async Task ApproveRentalAsync(Rental? rental)
     {
         if (rental == null) return;
@@ -89,10 +131,7 @@ public class RentalsViewModel : ObservableObject
             StatusMessage = "Rental approved!";
             await LoadRentalsAsync();
         }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed: {ex.Message}";
-        }
+        catch (Exception ex) { StatusMessage = $"Failed: {ex.Message}"; }
     }
 
     private async Task RejectRentalAsync(Rental? rental)
@@ -104,17 +143,15 @@ public class RentalsViewModel : ObservableObject
             StatusMessage = "Rental rejected.";
             await LoadRentalsAsync();
         }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Failed: {ex.Message}";
-        }
+        catch (Exception ex) { StatusMessage = $"Failed: {ex.Message}"; }
     }
+
     private async Task LeaveReviewAsync(Rental? rental)
-{
-    if (rental == null) return;
-    await Shell.Current.GoToAsync(nameof(ReviewsPage), new Dictionary<string, object>
     {
-        { "Rental", rental }
-    });
-}
+        if (rental == null) return;
+        await Shell.Current.GoToAsync(nameof(ReviewsPage), new Dictionary<string, object>
+        {
+            { "Rental", rental }
+        });
+    }
 }

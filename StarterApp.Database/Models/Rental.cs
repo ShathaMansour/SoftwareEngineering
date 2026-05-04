@@ -16,4 +16,10 @@ public class Rental
     public decimal TotalPrice { get; set; }
     public DateTime RequestedAt { get; set; }
     public DateTime? ApprovedAt { get; set; }
+    public bool IsApproved => Status == "Approved";
+    public bool IsCompleted => Status == "Completed";  
+    public bool IsRejected => Status == "Rejected"; 
+    public bool IsOutForRent => Status == "Out for Rent";
+    public bool IsReturned => Status == "Returned";
+    public bool IsOverdue => Status == "Overdue";
 }

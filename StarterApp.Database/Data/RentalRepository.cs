@@ -47,4 +47,13 @@ public class RentalRepository : IRentalRepository
             await _context.SaveChangesAsync();
         }
     }
+    public async Task<List<Rental>> GetConflictingRentalsAsync(int itemId, DateTime startDate, DateTime endDate)
+    {
+        return await _context.Rentals
+            .Where(r => r.ItemId == itemId
+                && r.Status == "Approved"
+                && r.StartDate < endDate
+                && r.EndDate > startDate)
+            .ToListAsync();
+    }
 }
