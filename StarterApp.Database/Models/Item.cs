@@ -12,7 +12,7 @@ public class Item
     public decimal DailyRate { get; set; }
     public string Category { get; set; }
     [NotMapped] public int CategoryId { get; set; }
-    [NotMapped] public int OwnerId { get; set; }
+    public int OwnerId { get; set; }
     [NotMapped] public string OwnerName { get; set; }
     [NotMapped] public double Latitude { get; set; }
     [NotMapped] public double Longitude { get; set; }

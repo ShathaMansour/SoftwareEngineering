@@ -78,13 +78,19 @@ public class AppDbContext : DbContext
                   .WithMany(r => r.UserRoles)
                   .HasForeignKey(ur => ur.RoleId);
         });
-        // Add this alongside the other entity configurations
         modelBuilder.Entity<Category>(entity =>
         {
         entity.HasIndex(e => e.Slug).IsUnique();
         entity.Property(e => e.Name).HasMaxLength(100);
         entity.Property(e => e.Slug).HasMaxLength(100);
         });
+        modelBuilder.Entity<Category>().HasData(
+            new Category { Id = 1, Name = "Tools", Slug = "tools" },
+            new Category { Id = 2, Name = "Camping", Slug = "camping" },
+            new Category { Id = 3, Name = "Electronics", Slug = "electronics" },
+            new Category { Id = 4, Name = "Sports", Slug = "sports" },
+            new Category { Id = 5, Name = "Games", Slug = "games" }
+        );
     }
 
 }
