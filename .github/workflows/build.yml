@@ -29,11 +29,15 @@ jobs:
         run: dotnet build StarterApp.Database/StarterApp.Database.csproj --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test StarterApp.Tests/StarterApp.Tests.csproj --configuration Release --no-restore --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByFile="**/Migrations/*.cs"
-        
-      - name: Generate Coverage Summary
-        run: reportgenerator -reports:"./coverage/**/coverage.cobertura.xml" -targetdir:"./coverage-report" -reporttypes:"MarkdownSummaryGithub;Html" -assemblyfilters:"-StarterApp.Database.Migrations"
+        run: dotnet test StarterApp.Tests/StarterApp.Tests.csproj --configuration Release --no-restore --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
 
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate Coverage Summary
+        run: reportgenerator -reports:"./coverage/**/coverage.cobertura.xml" -targetdir:"./coverage-report" -reporttypes:"MarkdownSummaryGithub;Html" -classfilters:"-StarterApp.Database.Migrations.*"
+
+      - name: Write Coverage to Job Summary
         run: cat ./coverage-report/SummaryGithub.md >> $env:GITHUB_STEP_SUMMARY
         shell: pwsh
 
