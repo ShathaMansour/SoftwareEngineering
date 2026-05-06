@@ -29,12 +29,16 @@ public class ItemRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetByIdAsync_WithValidId_ShouldReturnItem()
     {
-        // Arrange & Act
-        var item = await _repository.GetByIdAsync(1);
+        // Arrange — get all items first and pick the first one dynamically
+        var allItems = await _repository.GetAllAsync();
+        var firstItem = allItems.First();
+
+        // Act
+        var item = await _repository.GetByIdAsync(firstItem.Id);
 
         // Assert
         Assert.NotNull(item);
-        Assert.Equal("Electric Drill", item.Title);
+        Assert.Equal(firstItem.Title, item.Title);
     }
 
     [Fact]

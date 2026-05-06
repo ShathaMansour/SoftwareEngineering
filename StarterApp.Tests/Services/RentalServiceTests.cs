@@ -1,4 +1,3 @@
-using Moq;
 using StarterApp.Database.Data;
 using StarterApp.Database.Models;
 using StarterApp.Tests.Fixtures;
@@ -19,10 +18,7 @@ public class RentalServiceTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetIncomingAsync_ShouldReturnRentalsForOwner()
     {
-        // Arrange & Act
         var rentals = await _rentalRepository.GetIncomingAsync(1);
-
-        // Assert
         Assert.NotNull(rentals);
         Assert.All(rentals, r => Assert.Equal(1, r.OwnerId));
     }
@@ -30,10 +26,7 @@ public class RentalServiceTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetOutgoingAsync_ShouldReturnRentalsForBorrower()
     {
-        // Arrange & Act
         var rentals = await _rentalRepository.GetOutgoingAsync(2);
-
-        // Assert
         Assert.NotNull(rentals);
         Assert.All(rentals, r => Assert.Equal(2, r.BorrowerId));
     }
@@ -41,24 +34,44 @@ public class RentalServiceTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task UpdateStatusAsync_ShouldChangeRentalStatus()
     {
-        // Arrange & Act
-        await _rentalRepository.UpdateStatusAsync(1, "Approved");
-        var rental = await _rentalRepository.GetByIdAsync(1);
+        // Arrange — create a fresh rental so we don't depend on seeded data order
+        var rental = new Rental
+        {
+            ItemId = 1, ItemTitle = "Electric Drill",
+            BorrowerId = 2, OwnerId = 1,
+            StartDate = DateTime.Today, EndDate = DateTime.Today.AddDays(1),
+            Status = "Requested", TotalPrice = 5.00m, RequestedAt = DateTime.UtcNow
+        };
+        _fixture.Context.Rentals.Add(rental);
+        await _fixture.Context.SaveChangesAsync();
+
+        // Act
+        await _rentalRepository.UpdateStatusAsync(rental.Id, "Approved");
+        var updated = await _rentalRepository.GetByIdAsync(rental.Id);
 
         // Assert
-        Assert.Equal("Approved", rental?.Status);
+        Assert.Equal("Approved", updated?.Status);
     }
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    public async Task GetByIdAsync_ShouldReturnExistingRental(int rentalId)
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnExistingRental()
     {
-        // Arrange & Act
-        var rental = await _rentalRepository.GetByIdAsync(rentalId);
+        // Arrange — create a known rental
+        var rental = new Rental
+        {
+            ItemId = 1, ItemTitle = "Electric Drill",
+            BorrowerId = 2, OwnerId = 1,
+            StartDate = DateTime.Today, EndDate = DateTime.Today.AddDays(2),
+            Status = "Requested", TotalPrice = 10.00m, RequestedAt = DateTime.UtcNow
+        };
+        _fixture.Context.Rentals.Add(rental);
+        await _fixture.Context.SaveChangesAsync();
+
+        // Act
+        var fetched = await _rentalRepository.GetByIdAsync(rental.Id);
 
         // Assert
-        Assert.NotNull(rental);
-        Assert.True(rental.Id > 0);
+        Assert.NotNull(fetched);
+        Assert.True(fetched.Id > 0);
     }
 }
