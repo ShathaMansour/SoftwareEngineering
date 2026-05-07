@@ -62,8 +62,7 @@ public partial class ItemDetailViewModel : ObservableObject
     public IRelayCommand ToggleEditCommand { get; }
     public IAsyncRelayCommand RentItemCommand { get; }
     public IAsyncRelayCommand ViewReviewsCommand { get; }
-    public decimal EstimatedTotal => DailyRate * (decimal)(EndDate - StartDate).TotalDays;
-
+    public decimal EstimatedTotal => DailyRate * ((decimal)(EndDate - StartDate).TotalDays + 1);
     // API mode constructor
     public ItemDetailViewModel(IAuthenticationService authService, IApiService apiService, IRentalService rentalService)
     {

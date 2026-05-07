@@ -8,7 +8,7 @@
 
     <Grid Grid.Row="0" ColumnDefinitions="*,*,*,*" Margin="20,10">
         <Button Grid.Column="0" Text="Create Item" Command="{Binding GoToCreateItemCommand}" />
-        <Button Grid.Column="1" Text="My Rentals" Command="{Binding GoToRentalsCommand}" />
+        <Button Grid.Column="1" Text="MyRentals" Command="{Binding GoToRentalsCommand}" />
         <Button Grid.Column="2" Text="Near Me" Command="{Binding GoToNearbyCommand}" />
         <Button Grid.Column="3" Text="Profile" Command="{Binding GoToProfileCommand}" />
     </Grid>
