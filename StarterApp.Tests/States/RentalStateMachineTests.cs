@@ -133,4 +133,80 @@ public class RentalStateMachineTests
 
         Assert.Equal(expectedStatus, rental.Status);
     }
+        // --- CompletedState invalid transitions ---
+    [Fact]
+    public async Task CompletedState_Return_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Completed")).Return(CreateRental("Completed")));
+
+    [Fact]
+    public async Task CompletedState_StartRental_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Completed")).StartRental(CreateRental("Completed")));
+
+    // --- RejectedState invalid transitions ---
+    [Fact]
+    public async Task RejectedState_Reject_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Rejected")).Reject(CreateRental("Rejected")));
+
+    [Fact]
+    public async Task RejectedState_Return_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Rejected")).Return(CreateRental("Rejected")));
+
+    // --- ReturnedState invalid transitions ---
+    [Fact]
+    public async Task ReturnedState_Approve_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Returned")).Approve(CreateRental("Returned")));
+
+    [Fact]
+    public async Task ReturnedState_StartRental_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Returned")).StartRental(CreateRental("Returned")));
+
+    // --- OutForRentState invalid transitions ---
+    [Fact]
+    public async Task OutForRentState_Approve_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Out for Rent")).Approve(CreateRental("Out for Rent")));
+
+    [Fact]
+    public async Task OutForRentState_Complete_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Out for Rent")).Complete(CreateRental("Out for Rent")));
+
+    // --- OverdueState invalid transitions ---
+    [Fact]
+    public async Task OverdueState_Approve_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Overdue")).Approve(CreateRental("Overdue")));
+
+    [Fact]
+    public async Task OverdueState_Complete_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Overdue")).Complete(CreateRental("Overdue")));
+
+    // --- ApprovedState invalid transitions ---
+    [Fact]
+    public async Task ApprovedState_Approve_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Approved")).Approve(CreateRental("Approved")));
+
+    [Fact]
+    public async Task ApprovedState_Return_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Approved")).Return(CreateRental("Approved")));
+
+    // --- RequestedState invalid transitions ---
+    [Fact]
+    public async Task RequestedState_Return_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Requested")).Return(CreateRental("Requested")));
+
+    [Fact]
+    public async Task RequestedState_Complete_ShouldThrow() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            new RentalStateMachine(CreateRental("Requested")).Complete(CreateRental("Requested")));
 }
