@@ -1,5 +1,6 @@
 using StarterApp.Database.Models;
 using StarterApp.Database.Data;
+using StarterApp.Database.States;
 
 namespace StarterApp.Services;
 
@@ -82,14 +83,32 @@ public class RentalService : IRentalService
         return await _rentalRepository!.CreateAsync(rental);
     }
 
-    public async Task UpdateRentalStatusAsync(int rentalId, string status)
+    public async Task UpdateRentalStatusAsync(int rentalId, string newStatus)
     {
         if (_apiService != null)
         {
-            await _apiService.UpdateRentalStatusAsync(rentalId, status);
+            await _apiService.UpdateRentalStatusAsync(rentalId, newStatus);
             return;
         }
-        await _rentalRepository!.UpdateStatusAsync(rentalId, status);
+
+        // Local DB mode only — use state machine
+        var rental = await _rentalRepository!.GetByIdAsync(rentalId)
+            ?? throw new Exception("Rental not found.");
+
+        var machine = new RentalStateMachine(rental);
+
+        await (newStatus switch
+        {
+            "Approved"     => machine.Approve(rental),
+            "Rejected"     => machine.Reject(rental),
+            "Out for Rent" => machine.StartRental(rental),
+            "Returned"     => machine.Return(rental),
+            "Completed"    => machine.Complete(rental),
+            "Overdue"      => machine.MarkOverdue(rental),
+            _ => throw new InvalidOperationException($"Unknown status: {newStatus}")
+        });
+
+        await _rentalRepository!.UpdateStatusAsync(rentalId, rental.Status);
     }
 
     public async Task<bool> CanTransitionAsync(Rental rental, string newStatus)
